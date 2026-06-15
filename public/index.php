@@ -1,6 +1,6 @@
 <?php
 /**
- * DrSerita Monitor - Main Entry Point
+ * Apache2 Monitor - Main Entry Point
  * Handles authentication and routing
  */
 

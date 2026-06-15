@@ -1,4 +1,4 @@
-# DrSerita Monitor - cPanel Setup Guide
+# Apache2 Monitor - cPanel Setup Guide
 
 Complete, beginner-friendly setup guide for shared hosting with cPanel.
 

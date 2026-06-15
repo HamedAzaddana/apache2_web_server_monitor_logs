@@ -1,6 +1,6 @@
 <?php
 /**
- * DrSerita Monitor Configuration
+ * Apache2 Monitor Configuration
  *
  * Copy this file to config.php and customize these values.
  *

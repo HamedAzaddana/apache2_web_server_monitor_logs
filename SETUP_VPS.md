@@ -1,4 +1,4 @@
-# DrSerita Monitor - VPS Setup Guide
+# Apache2 Monitor - VPS Setup Guide
 
 Complete, beginner-friendly setup guide for VPS (Virtual Private Server) with root/SSH access.
 
