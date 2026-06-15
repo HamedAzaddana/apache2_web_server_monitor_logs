@@ -1,0 +1,42 @@
+<?php if (!defined('ACCESS_ALLOWED')) exit('Direct access not allowed'); ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - <?php echo APP_TITLE; ?> Monitor</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #059669; --bg: #f0fdf4; }
+        body { background-color: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; }
+        .login-card { background: white; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); padding: 2rem; width: 100%; max-width: 400px; }
+        .login-header { text-align: center; margin-bottom: 2rem; }
+        .login-header i { font-size: 3rem; color: var(--primary); }
+        .btn-login { background-color: var(--primary); border-color: var(--primary); padding: 0.75rem; }
+        .btn-login:hover { background-color: #047857; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-chart-line"></i>
+            <h3 class="mt-3" style="color: var(--primary)"><?php echo APP_TITLE; ?> Monitor</h3>
+            <p class="text-muted">Please login to continue</p>
+        </div>
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <?php if (isset($success)): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
+        <form method="POST" action="">
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required autofocus>
+            </div>
+            <button type="submit" class="btn btn-primary btn-login w-100">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+            </button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# Configuration files
+config.php
+
+# Database
+cache/logs.db
+cache/logs.db-shm
+cache/logs.db-wal
+
+# Logs
+logs/*.log
+logs/parser.log
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# Build artifacts
+node_modules/
+composer.lock
+
+# Backup files
+*.bak
+*.backup
+
+# Claude Code files
+.claude/

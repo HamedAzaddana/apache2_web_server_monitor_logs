@@ -1,0 +1,13 @@
+# Prevent directory browsing
+Options -Indexes
+
+# Deny access to views directory
+RedirectMatch 404 ^/views/.*$
+
+# Deny access to config files
+<FilesMatch "^(config|composer)\.(php|json|lock)$">
+    Require all denied
+</FilesMatch>
+
+# Allow only main entry points for PHP files
+# This is handled at the application level in each PHP file
