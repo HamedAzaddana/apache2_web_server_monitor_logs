@@ -3,10 +3,15 @@
  * DrSerita Monitor Configuration
  *
  * Copy this file to config.php and customize these values.
+ *
+ * IMPORTANT: After editing config.php, set proper permissions:
+ *   chown www-data:www-data config.php
+ *   chmod 640 config.php
  */
 
-// Base directory (parent of public/)
-define('BASE_DIR', dirname(__DIR__));
+// Base directory (current directory - where config.php is located)
+// Note: __DIR__ is the directory containing this config file
+define('BASE_DIR', __DIR__);
 
 // ============================================
 // DATABASE CONFIGURATION

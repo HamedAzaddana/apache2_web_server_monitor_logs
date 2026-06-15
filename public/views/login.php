@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Login - <?php echo APP_TITLE; ?> Monitor</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #059669; --bg: #f0fdf4; }
         body { background-color: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; }
@@ -13,6 +14,8 @@
         .login-header i { font-size: 3rem; color: var(--primary); }
         .btn-login { background-color: var(--primary); border-color: var(--primary); padding: 0.75rem; }
         .btn-login:hover { background-color: #047857; }
+        .btn-login:disabled { opacity: 0.65; cursor: not-allowed; }
+        .spinner-border-sm { width: 1rem; height: 1rem; }
     </style>
 </head>
 <body>
@@ -28,15 +31,33 @@
         <?php if (isset($success)): ?>
             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
-        <form method="POST" action="">
+        <form method="POST" action="" id="loginForm">
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" name="password" required autofocus>
             </div>
-            <button type="submit" class="btn btn-primary btn-login w-100">
-                <i class="fas fa-sign-in-alt me-2"></i>Login
+            <button type="submit" class="btn btn-primary btn-login w-100" id="loginBtn">
+                <span class="btn-text">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </span>
+                <span class="btn-loading" style="display: none;">
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Logging in...
+                </span>
             </button>
         </form>
     </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            var btn = document.getElementById('loginBtn');
+            var btnText = btn.querySelector('.btn-text');
+            var btnLoading = btn.querySelector('.btn-loading');
+
+            // Show loading state
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+        });
+    </script>
 </body>
 </html>

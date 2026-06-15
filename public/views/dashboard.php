@@ -142,7 +142,18 @@
                         <th>User Agent</th>
                     </tr>
                 </thead>
-                <tbody id="logTableBody"></tbody>
+                <tbody id="logTableBody">
+                    <tr id="tableLoadingRow">
+                        <td colspan="8" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="spinner-border text-success mb-3" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="text-muted">Loading logs...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
         <nav>
@@ -317,6 +328,20 @@
         params.action = 'table';
         params.page = currentPage;
 
+        // Show table loading state
+        $('#logTableBody').html(`
+            <tr id="tableLoadingRow">
+                <td colspan="8" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="spinner-border text-success mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="text-muted">Loading logs...</span>
+                    </div>
+                </td>
+            </tr>
+        `);
+
         $.get('api.php', params, function(res) {
             showLoader(false);
             if(!res || res.error) { console.error("Table Error:", res); return; }
@@ -325,7 +350,9 @@
             if(res.rows && res.rows.length > 0) {
                 res.rows.forEach(row => {
                     let badgeClass = row.status_code == 200 ? 'bg-success' : (row.status_code == 404 ? 'bg-warning' : 'bg-danger');
-                    let urlLink = `<a href="${row.url}" target="_blank" style="color: #059669; text-decoration: none;">${row.url}</a>`;
+                    // Use URL decoded for display, but keep original URL for the link
+                    let displayUrl = row.url_decoded || row.url;
+                    let urlLink = `<a href="${row.url}" target="_blank" style="color: #059669; text-decoration: none;">${displayUrl}</a>`;
                     let uaTitle = row.user_agent ? row.user_agent.replace(/"/g, '&quot;') : 'N/A';
 
                     html += `<tr>

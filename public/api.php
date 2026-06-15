@@ -84,11 +84,18 @@ if ($trafficFilter === 'google') {
 // Exclude URLs containing 'monitor/logs'
 $whereClauses[] = "url NOT LIKE '%monitor/logs%'";
 
-// Search query (search in URL and User Agent)
+// Search query with URL encoding for SQL LIKE
 if (!empty($searchQuery)) {
-    $whereClauses[] = "(url LIKE :search OR user_agent LIKE :search)";
+    // Encode the search term to match how URLs are stored in database
+    $encodedSearch = rawurlencode($searchQuery);
+    // Search in both encoded URL, decoded URL (if stored), and user agent
+    // Use LIKE %% for partial matching
+    $whereClauses[] = "(url LIKE :search_url OR url LIKE :search_encoded OR user_agent LIKE :search_ua)";
     $searchPattern = "%$searchQuery%";
-    $params[':search'] = $searchPattern;
+    $encodedPattern = "%$encodedSearch%";
+    $params[':search_url'] = $searchPattern;
+    $params[':search_encoded'] = $encodedPattern;
+    $params[':search_ua'] = $searchPattern;
 }
 
 // Response time filter (in milliseconds)
@@ -173,6 +180,9 @@ try {
         $dt = getTehranTimeObj($row['date_time']);
         if (!$dt) continue;
 
+        // Decode URL for display
+        $row['url_decoded'] = rawurldecode($row['url']);
+
         // Normalize Tehran date to start of day for comparison
         $tehranDate = new DateTime($dt->format('Y-m-d') . ' 00:00:00', new DateTimeZone('Asia/Tehran'));
 
@@ -188,6 +198,8 @@ try {
             $row['tehran_date'] = $dt->format('Y-m-d');
             $row['tehran_time'] = $dt->format('H:i:s');
             $row['tehran_timestamp'] = $dt->getTimestamp();
+            // Add URL decoded version for display and search
+            $row['url_decoded'] = rawurldecode($row['url']);
             $processedRows[] = $row;
         }
     }
