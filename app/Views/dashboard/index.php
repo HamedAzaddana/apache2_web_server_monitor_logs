@@ -1,18 +1,22 @@
-<?php if (!defined('ACCESS_ALLOWED')) exit('Direct access not allowed'); ?>
+<?php
+/**
+ * Dashboard View
+ */
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo APP_TITLE; ?> Monitor</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/flatpickr.min.css">
-    <link rel="stylesheet" href="css/sweetalert2.min.css">
-    <script src="js/highcharts.js"></script>
-    <script src="js/jquery-3.6.0.min.js"></script>
-    <script src="js/flatpickr.min.js"></script>
-    <script src="js/flatpickr-fa.js"></script>
-    <script src="js/sweetalert2.all.min.js"></script>
+    <title><?= APP_TITLE ?> Monitor</title>
+    <link href="<?= url('css/bootstrap.min.css') ?>" rel="stylesheet">
+    <link href="<?= url('css/all.min.css') ?>" rel="stylesheet">
+    <link rel="stylesheet" href="<?= url('css/flatpickr.min.css') ?>">
+    <link rel="stylesheet" href="<?= url('css/sweetalert2.min.css') ?>">
+    <script src="<?= url('js/highcharts.js') ?>"></script>
+    <script src="<?= url('js/jquery-3.6.0.min.js') ?>"></script>
+    <script src="<?= url('js/flatpickr.min.js') ?>"></script>
+    <script src="<?= url('js/flatpickr-fa.js') ?>"></script>
+    <script src="<?= url('js/sweetalert2.all.min.js') ?>"></script>
 
     <style>
         :root { --primary: #059669; --bg: #f0fdf4; --card: #ffffff; --text: #334155; }
@@ -27,6 +31,10 @@
         .timezone-badge { background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
         .ua-tooltip { cursor: help; border-bottom: 1px dotted #64748b; }
     </style>
+    <script>
+        // Set base URL for JavaScript
+        const BASE_URL = '<?= BASE_URL ?>';
+    </script>
 </head>
 <body>
 
@@ -35,14 +43,14 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 style="color: var(--primary)"><i class="fas fa-chart-line me-2"></i><?php echo APP_TITLE; ?> Logs</h3>
+            <h3 style="color: var(--primary)"><i class="fas fa-chart-line me-2"></i><?= APP_TITLE ?> Logs</h3>
             <span class="timezone-badge"><i class="fas fa-clock me-1"></i> Asia/Tehran (UTC+3:30)</span>
         </div>
         <div class="d-flex gap-2">
             <button id="btnTruncateLogs" class="btn btn-warning btn-sm">
                 <i class="fas fa-trash-alt me-1"></i>Truncate All Logs
             </button>
-            <a href="?do_logout=1" class="btn btn-outline-danger btn-sm">Logout</a>
+            <a href="<?= url('logout') ?>" class="btn btn-outline-danger btn-sm">Logout</a>
         </div>
     </div>
 
@@ -66,11 +74,18 @@
                 <select id="filterStatus" class="form-select">
                     <option value="">All</option>
                     <option value="200">200 OK</option>
+                    <option value="300">300 Multiple Choices</option>
+                    <option value="301">301 Moved Permanently</option>
+                    <option value="302">302 Found</option>
+                    <option value="303">303 See Other</option>
+                    <option value="304">304 Not Modified</option>
+                    <option value="307">307 Temporary Redirect</option>
+                    <option value="308">308 Permanent Redirect</option>
                     <option value="404">404 Not Found</option>
                     <option value="500">500 Error</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 d-none">
                 <label class="small text-muted">Traffic</label>
                 <select id="filterTraffic" class="form-select">
                     <option value="all">All</option>
@@ -114,10 +129,16 @@
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col-12">
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6 class="text-muted">HTTP Status Distribution</h6>
+                <div id="chartStatus" style="height: 300px;"></div>
+            </div>
+        </div>
+        <div class="col-md-8">
             <div class="card p-3">
                 <h6 class="text-muted">Top 404 URLs</h6>
-                <div id="chart404" style="height: 250px;"></div>
+                <div id="chart404" style="height: 300px;"></div>
             </div>
         </div>
     </div>
@@ -183,6 +204,11 @@
     let dateTo = getLocalDateString(endDate);
     let timeFrom = "00:00";
     let timeTo = "23:59";
+
+    // Helper to build URL with BASE_URL
+    function apiUrl(path) {
+        return BASE_URL + path;
+    }
 
     // --- Initialize Date & Time Pickers ---
     flatpickr("#filterDateRange", {
@@ -272,9 +298,8 @@
     function loadCharts() {
         showLoader(true);
         const params = getParams();
-        params.action = 'charts';
 
-        $.get('api.php', params, function(res) {
+        $.get(apiUrl('/api/charts'), params, function(res) {
             showLoader(false);
             if(!res || res.error) { console.error("Chart Error:", res); return; }
 
@@ -305,6 +330,40 @@
                 });
             }
 
+            // Status Distribution Pie Chart
+            if(res.status_dist) {
+                const statusData = [
+                    { name: '2xx (Success)', y: res.status_dist['2xx'] || 0, color: '#10b981' },
+                    { name: '3xx (Redirect)', y: res.status_dist['3xx'] || 0, color: '#3b82f6' },
+                    { name: '4xx (Client Error)', y: res.status_dist['4xx'] || 0, color: '#f59e0b' },
+                    { name: '5xx (Server Error)', y: res.status_dist['5xx'] || 0, color: '#ef4444' }
+                ].filter(item => item.y > 0);
+
+                if (statusData.length > 0) {
+                    Highcharts.chart('chartStatus', {
+                        chart: { type: 'pie', backgroundColor: 'transparent' },
+                        title: { text: null },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                                }
+                            }
+                        },
+                        series: [{
+                            name: 'Requests',
+                            colorByPoint: true,
+                            data: statusData
+                        }]
+                    });
+                } else {
+                    $('#chartStatus').html('<p class="text-center text-muted pt-5">No data for this period</p>');
+                }
+            }
+
             if(res.top_404 && res.top_404.labels.length > 0) {
                 Highcharts.chart('chart404', {
                     chart: { type: 'bar', backgroundColor: 'transparent' },
@@ -325,7 +384,6 @@
     function loadTable() {
         showLoader(true);
         const params = getParams();
-        params.action = 'table';
         params.page = currentPage;
 
         // Show table loading state
@@ -342,15 +400,14 @@
             </tr>
         `);
 
-        $.get('api.php', params, function(res) {
+        $.get(apiUrl('/api/table'), params, function(res) {
             showLoader(false);
             if(!res || res.error) { console.error("Table Error:", res); return; }
 
             let html = '';
             if(res.rows && res.rows.length > 0) {
                 res.rows.forEach(row => {
-                    let badgeClass = row.status_code == 200 ? 'bg-success' : (row.status_code == 404 ? 'bg-warning' : 'bg-danger');
-                    // Use URL decoded for display, but keep original URL for the link
+                    let badgeClass = row.status_code == 200 ? 'bg-success' : (row.status_code == 404 ? 'bg-warning' : (row.status_code >= 300 && row.status_code < 400 ? 'bg-info' : 'bg-danger'));
                     let displayUrl = row.url_decoded || row.url;
                     let urlLink = `<a href="${row.url}" target="_blank" style="color: #059669; text-decoration: none;">${displayUrl}</a>`;
                     let uaTitle = row.user_agent ? row.user_agent.replace(/"/g, '&quot;') : 'N/A';
@@ -435,15 +492,14 @@
     // --- CSV Export Link ---
     function updateCsvLink() {
         const params = getParams();
-        params.export = 'csv';
         const query = new URLSearchParams(params).toString();
-        $('#csvLink').attr('href', `api.php?${query}`);
+        $('#csvLink').attr('href', apiUrl('/api/export') + '?' + query);
     }
 
     // --- Global AJAX Error Handler for 403 Unauthorized ---
     $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
         if (jqxhr.status === 403) {
-            window.location.href = '?do_login=1';
+            window.location.href = apiUrl('/login');
         }
     });
 
@@ -461,7 +517,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: 'truncate_logs.php',
+                    url: apiUrl('/api/truncate'),
                     type: 'POST',
                     dataType: 'json',
                     success: function(response) {
@@ -472,7 +528,6 @@
                                 icon: 'success',
                                 confirmButtonColor: '#059669'
                             }).then(() => {
-                                // Refresh the table after deletion
                                 refreshAll();
                             });
                         } else {
@@ -502,6 +557,6 @@
         refreshAll();
     });
 </script>
-<script src="js/bootstrap.bundle.min.js"></script>
+<script src="<?= url('js/bootstrap.bundle.min.js') ?>"></script>
 </body>
 </html>

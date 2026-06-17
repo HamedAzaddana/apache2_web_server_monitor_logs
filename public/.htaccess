@@ -9,5 +9,11 @@ RedirectMatch 404 ^/views/.*$
     Require all denied
 </FilesMatch>
 
-# Allow only main entry points for PHP files
-# This is handled at the application level in each PHP file
+# Redirect all requests to index.php (Laravel-style routing)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Allow access to actual files
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>

@@ -1,11 +1,15 @@
-<?php if (!defined('ACCESS_ALLOWED')) exit('Direct access not allowed'); ?>
+<?php
+/**
+ * Login View
+ */
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - <?php echo APP_TITLE; ?> Monitor</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/all.min.css" rel="stylesheet">
+    <title>Login - <?= APP_TITLE ?> Monitor</title>
+    <link href="<?= url('css/bootstrap.min.css') ?>" rel="stylesheet">
+    <link href="<?= url('css/all.min.css') ?>" rel="stylesheet">
     <style>
         :root { --primary: #059669; --bg: #f0fdf4; }
         body { background-color: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; }
@@ -22,7 +26,7 @@
     <div class="login-card">
         <div class="login-header">
             <i class="fas fa-chart-line"></i>
-            <h3 class="mt-3" style="color: var(--primary)"><?php echo APP_TITLE; ?> Monitor</h3>
+            <h3 class="mt-3" style="color: var(--primary)"><?= APP_TITLE ?> Monitor</h3>
             <p class="text-muted">Please login to continue</p>
         </div>
         <?php if (isset($error)): ?>
@@ -31,7 +35,7 @@
         <?php if (isset($success)): ?>
             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
-        <form method="POST" action="" id="loginForm">
+        <form method="POST" action="<?= url('login') ?>" id="loginForm">
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" name="password" required autofocus>
