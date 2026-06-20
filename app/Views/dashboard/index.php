@@ -85,11 +85,11 @@
                     <option value="500">500 Error</option>
                 </select>
             </div>
-            <div class="col-md-2 d-none">
+            <div class="col-md-2">
                 <label class="small text-muted">Traffic</label>
                 <select id="filterTraffic" class="form-select">
-                    <option value="all">All</option>
-                    <option value="google">Google Bot</option>
+                    <option value="all">All Traffic</option>
+                    <option value="google">Google Bots</option>
                     <option value="non-google">Non-Google</option>
                 </select>
             </div>

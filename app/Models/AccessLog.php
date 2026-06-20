@@ -37,6 +37,38 @@ class AccessLog
     }
 
     /**
+     * Check if user agent belongs to Google
+     */
+    private function isGoogleUserAgent($ua)
+    {
+        $google_bot_patterns = [
+            '/Googlebot/i',
+            '/Googlebot-Image/i',
+            '/Googlebot-Video/i',
+            '/Storebot-Google/i',
+            '/Google-InspectionTool/i',
+            '/GoogleOther/i',
+            '/Google-CloudVertexBot/i',
+            '/AdsBot-Google/i',
+            '/Mediapartners-Google/i',
+            '/FeedFetcher-Google/i',
+            '/Google-Site-Verification/i',
+            '/APIs-Google/i',
+            '/DuplexWeb-Google/i',
+            '/GoogleReadAloud/i',
+            '/Google-Favicon/i',
+            '/GoogleProducer/i',
+        ];
+
+        foreach ($google_bot_patterns as $pattern) {
+            if (preg_match($pattern, $ua)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Build WHERE clauses for filtering
      */
     private function buildFilters($filters)
@@ -77,11 +109,12 @@ class AccessLog
             $params[':status'] = $filters['status'];
         }
 
-        // Traffic filter
+        // Traffic filter - use comprehensive Google detection
+        // Note: For SQL filtering, we use a broad pattern since we can't use the complex regex in SQL
         if (isset($filters['traffic']) && $filters['traffic'] === 'google') {
-            $whereClauses[] = "(user_agent LIKE '%Googlebot%' OR user_agent LIKE '%Google %')";
+            $whereClauses[] = "(user_agent LIKE '%google%' AND user_agent NOT LIKE '%google search app%')";
         } elseif (isset($filters['traffic']) && $filters['traffic'] === 'non-google') {
-            $whereClauses[] = "(user_agent NOT LIKE '%Googlebot%' AND user_agent NOT LIKE '%Google %')";
+            $whereClauses[] = "(user_agent NOT LIKE '%google%' OR user_agent LIKE '%google search app%')";
         }
 
         // Exclude monitor logs
@@ -272,8 +305,7 @@ class AccessLog
         $nonGoogleCount = 0;
 
         foreach ($processedRows as $row) {
-            $ua = strtolower($row['user_agent']);
-            if (strpos($ua, 'googlebot') !== false || strpos($ua, 'google ') !== false) {
+            if ($this->isGoogleUserAgent($row['user_agent'])) {
                 $googleCount++;
             } else {
                 $nonGoogleCount++;
